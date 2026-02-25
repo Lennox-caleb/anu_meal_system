@@ -1,0 +1,71 @@
+<?php
+mysqli_report(MYSQLI_REPORT_OFF);
+$conn = new mysqli('localhost', 'root', '', 'anu_meal_booking', 3307);
+
+if ($conn->connect_errno) {
+    die('Connection failed: ' . $conn->connect_error);
+}
+$conn->set_charset('utf8mb4');
+
+// Generate fresh correct bcrypt hashes
+$hash_admin   = password_hash('admin123',   PASSWORD_BCRYPT);
+$hash_student = password_hash('student123', PASSWORD_BCRYPT);
+
+// Wipe old broken users and re-insert
+$conn->query("DELETE FROM users WHERE username IN ('superadmin','admin','student')");
+
+$stmt = $conn->prepare("INSERT INTO users (username,password,fullname,email,role,student_id) VALUES (?,?,?,?,?,?)");
+
+$users = [
+    ['superadmin', $hash_admin,   'Super Administrator', 'superadmin@anu.ac.ke', 'super_admin', 'SA001'],
+    ['admin',      $hash_admin,   'Cafeteria Manager',   'manager@anu.ac.ke',    'admin',       'AD001'],
+    ['student',    $hash_student, 'John Doe',            'john.doe@anu.ac.ke',   'student',     'ANU/2024/001'],
+];
+
+foreach ($users as $u) {
+    $stmt->bind_param("ssssss", $u[0], $u[1], $u[2], $u[3], $u[4], $u[5]);
+    $stmt->execute();
+}
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Fix Login</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+<div class="container py-5" style="max-width:500px">
+    <div class="card border-0 shadow rounded-4 overflow-hidden">
+        <div class="card-header py-3 text-white fw-bold"
+             style="background:linear-gradient(135deg,#ff0000,#fac823)">
+            ✅ Login Passwords Fixed!
+        </div>
+        <div class="card-body p-4">
+            <p class="text-success fw-semibold">All default users have been reset successfully.</p>
+
+            <table class="table table-bordered small">
+                <thead class="table-danger">
+                    <tr><th>Role</th><th>Username</th><th>Password</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Super Admin</td><td><code>superadmin</code></td><td><code>admin123</code></td></tr>
+                    <tr><td>Admin</td>      <td><code>admin</code></td>      <td><code>admin123</code></td></tr>
+                    <tr><td>Student</td>    <td><code>student</code></td>    <td><code>student123</code></td></tr>
+                </tbody>
+            </table>
+
+            <div class="alert alert-warning small py-2">
+                ⚠️ Delete <code>fix_login.php</code> after logging in successfully!
+            </div>
+
+            <a href="login.php"
+               class="btn w-100 fw-bold text-white"
+               style="background:linear-gradient(135deg,#ff0000,#fac823)">
+                → Go to Login
+            </a>
+        </div>
+    </div>
+</div>
+</body>
+</html>
