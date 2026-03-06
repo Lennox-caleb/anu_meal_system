@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: anu-meal-system
+    env: docker
+    plan: free
+    envVars:
+      - key: MYSQLHOST
+        sync: false
+      - key: MYSQLPORT
+        value: "3306"
+      - key: MYSQLUSER
+        sync: false
+      - key: MYSQLPASSWORD
+        sync: false
+      - key: MYSQLDATABASE
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: CRON_SECRET
+        sync: false

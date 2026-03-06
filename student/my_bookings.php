@@ -1,7 +1,9 @@
 <?php
 require_once '../includes/db.php';
 require_once '../includes/auth.php';
+require_once '../includes/notifications.php';
 requireLogin();
+checkMaintenance($conn);
 if ($_SESSION['role'] !== 'student') { header('Location: ../admin/dashboard.php'); exit; }
 
 $uid = $_SESSION['user_id'];
@@ -41,9 +43,7 @@ $bookings = $conn->query("
     <?php include '../includes/student_sidebar.php'; ?>
 
     <div class="main-content flex-grow-1">
-        <div class="topbar d-flex justify-content-between align-items-center">
-            <h1><i class="bi bi-calendar-check me-2"></i>My Bookings</h1>
-        </div>
+        <?php $page_title = '<i class="bi bi-calendar-check me-2"></i>My Bookings'; include '../includes/topbar.php'; ?>
 
         <div class="p-4 fade-in-up">
             <?php if ($msg): ?><div class="alert alert-success fade show"><i class="bi bi-check-circle me-1"></i><?= htmlspecialchars($msg) ?></div><?php endif; ?>
@@ -120,7 +120,7 @@ $bookings = $conn->query("
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<?php include '../includes/scripts.php'; ?>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script>
 // Generate QR codes for active bookings

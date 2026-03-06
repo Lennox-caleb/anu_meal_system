@@ -1,6 +1,7 @@
 <?php
 require_once '../includes/db.php';
 require_once '../includes/auth.php';
+require_once '../includes/notifications.php';
 requireSuperAdmin();
 
 $msg      = '';
@@ -97,7 +98,7 @@ if ($notif_exists) {
 <?php include '../includes/sidebar.php'; ?>
 <div class="main-content flex-grow-1">
 
-<div class="topbar"><h1><i class="bi bi-gear me-2"></i>System Settings</h1></div>
+<?php $page_title = '<i class="bi bi-gear me-2"></i>System Settings'; include '../includes/topbar.php'; ?>
 
 <div class="p-4 fade-in-up">
 
@@ -481,7 +482,7 @@ if ($notif_exists) {
 </div><!-- /main-content -->
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<?php include '../includes/scripts.php'; ?>
 <script>
 // Live server clock
 (function(){

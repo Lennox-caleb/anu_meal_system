@@ -1,7 +1,9 @@
 <?php
 require_once '../includes/db.php';
 require_once '../includes/auth.php';
+require_once '../includes/notifications.php';
 requireLogin();
+checkMaintenance($conn);
 if ($_SESSION['role'] !== 'student') { header('Location: ../admin/dashboard.php'); exit; }
 
 $uid = $_SESSION['user_id'];
@@ -38,17 +40,11 @@ $user = currentUser();
     <?php include '../includes/student_sidebar.php'; ?>
 
     <div class="main-content flex-grow-1">
-        <div class="topbar d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center gap-3">
-                <button class="btn btn-sm d-md-none" id="sidebarToggle"><i class="bi bi-list fs-5"></i></button>
-                <h1><i class="bi bi-house me-2"></i>My Dashboard</h1>
-            </div>
-            <span class="badge rounded-pill text-bg-danger"><?= date('D, d M Y') ?></span>
-        </div>
+        <?php $page_title = '<i class="bi bi-house me-2"></i>My Dashboard'; include '../includes/topbar.php'; ?>
 
         <div class="p-4 fade-in-up">
-            <!-- Welcome Banner -->
-            <div class="p-4 rounded-3 mb-4 text-white" style="background:var(--anu-gradient);">
+           <!-- Welcome Banner -->
+            <div class="p-4 rounded-3 mb-4 text-white" style="background:var(--gradient);">
                 <h4 class="fw-bold mb-1">Welcome back, <?= htmlspecialchars($user['fullname']) ?>! 👋</h4>
                 <p class="mb-0 opacity-90 small">Book your meals for today and upcoming days. Stay nourished!</p>
             </div>
@@ -132,11 +128,9 @@ $user = currentUser();
         </div>
     </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<?php include '../includes/scripts.php'; ?>
 <script>
-document.getElementById('sidebarToggle')?.addEventListener('click', () => {
-    document.getElementById('sidebar').classList.toggle('show');
-});
+// Sidebar toggle handled by app.js
 </script>
 </body>
 </html>

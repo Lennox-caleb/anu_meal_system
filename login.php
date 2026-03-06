@@ -110,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                     </div>
                     <div class="register">
-                        <p><small>Don't have an account? <a href="register.php" class="text-decoration-none">Register here</a></small></p>
+                        <p><small>No account? Contact your administrator. </a></small></p>
                     </div>
                     <button type="submit" class="btn btn-anu w-100 py-2">
                         <i class="bi bi-box-arrow-in-right me-2"></i> Sign In

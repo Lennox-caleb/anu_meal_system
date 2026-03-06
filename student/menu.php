@@ -1,6 +1,7 @@
 <?php
 require_once '../includes/db.php';
 require_once '../includes/auth.php';
+require_once '../includes/notifications.php';
 requireLogin();
 if ($_SESSION['role'] !== 'student') { header('Location: ../admin/dashboard.php'); exit; }
 
@@ -53,6 +54,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $ins->bind_param("siis", $code, $uid, $menu_id, $date);
                     $ins->execute();
                     logAction($conn, 'Meal Booked', "Booked {$m['name']} on {$date}. Code: {$code}");
+                    // Notify student (pending) and admins
+                    $last_id = $conn->insert_id;
+                    notifyBookingStatus($conn, $last_id);
+                    notifyAdminsNewBooking($conn, $last_id);
                     $new_booking = [
                         'code'      => $code,
                         'meal_name' => $m['name'],
@@ -105,12 +110,7 @@ while ($b = $booked_res->fetch_assoc()) $booked_ids[] = $b['menu_id'];
 <?php include '../includes/student_sidebar.php'; ?>
 <div class="main-content flex-grow-1">
 
-<div class="topbar d-flex justify-content-between align-items-center">
-  <h1><i class="bi bi-journal-text me-2"></i>Daily Menu</h1>
-  <a href="my_bookings.php" class="btn btn-sm btn-outline-danger">
-    <i class="bi bi-calendar-check me-1"></i>My Bookings
-  </a>
-</div>
+<?php $page_title = '<i class="bi bi-journal-text me-2"></i>Daily Menu'; include '../includes/topbar.php'; ?>
 
 <div class="p-4 fade-in-up">
 
@@ -323,6 +323,6 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 <?php endif; ?>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<?php include '../includes/scripts.php'; ?>
 </body>
 </html>

@@ -1,6 +1,7 @@
 <?php
 require_once '../includes/db.php';
 require_once '../includes/auth.php';
+require_once '../includes/notifications.php';
 requireAdmin();
 
 $msg = '';
@@ -64,17 +65,20 @@ $menus = $conn->query("SELECT * FROM menus $where ORDER BY date DESC, type ASC")
 <div class="d-flex">
     <?php include '../includes/sidebar.php'; ?>
 
-    <div class="main-content flex-grow-1">
-        <div class="topbar d-flex justify-content-between align-items-center">
-            <h1><i class="bi bi-journal-text me-2"></i>Menu Management</h1>
-            <button class="btn btn-anu btn-sm" data-bs-toggle="modal" data-bs-target="#addModal">
-                <i class="bi bi-plus-lg me-1"></i> Add Menu Item
-            </button>
-        </div>
+    <div class="main-content">
+        <?php $page_title = '<i class="bi bi-journal-text me-2"></i>Menu Management'; include '../includes/topbar.php'; ?>
 
         <div class="p-4 fade-in-up">
             <?php if ($msg):  ?><div class="alert alert-success alert-dismissible fade show"><i class="bi bi-check-circle me-1"></i><?= htmlspecialchars($msg) ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div><?php endif; ?>
             <?php if ($error): ?><div class="alert alert-danger alert-dismissible fade show"><i class="bi bi-exclamation-circle me-1"></i><?= htmlspecialchars($error) ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div><?php endif; ?>
+
+            <!-- Toolbar -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0 fw-bold text-danger"><i class="bi bi-journal-text me-2"></i>Menu Items</h5>
+                <button class="btn btn-anu" data-bs-toggle="modal" data-bs-target="#addModal">
+                    <i class="bi bi-plus-lg me-1"></i>Add Menu Item
+                </button>
+            </div>
 
             <!-- Filter -->
             <form method="GET" class="row g-2 mb-3 align-items-end">
@@ -147,7 +151,7 @@ $menus = $conn->query("SELECT * FROM menus $where ORDER BY date DESC, type ASC")
 <div class="modal fade" id="addModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header" style="background:var(--anu-gradient);color:#fff;">
+            <div class="modal-header" style="background:linear-gradient(135deg,#ff0000,#fac823);color:#fff;">
                 <h5 class="modal-title"><i class="bi bi-plus-circle me-2"></i>Add Menu Item</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -199,7 +203,7 @@ $menus = $conn->query("SELECT * FROM menus $where ORDER BY date DESC, type ASC")
 <div class="modal fade" id="editModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header" style="background:var(--anu-gradient);color:#fff;">
+            <div class="modal-header" style="background:linear-gradient(135deg,#ff0000,#fac823);color:#fff;">
                 <h5 class="modal-title"><i class="bi bi-pencil me-2"></i>Edit Menu Item</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -247,7 +251,7 @@ $menus = $conn->query("SELECT * FROM menus $where ORDER BY date DESC, type ASC")
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<?php include '../includes/scripts.php'; ?>
 <script>
 function editMenu(m) {
     document.getElementById('editId').value    = m.id;

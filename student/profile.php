@@ -1,7 +1,9 @@
 <?php
 require_once '../includes/db.php';
 require_once '../includes/auth.php';
+require_once '../includes/notifications.php';
 requireLogin();
+checkMaintenance($conn);
 if ($_SESSION['role'] !== 'student') { header('Location: ../admin/dashboard.php'); exit; }
 
 $uid = $_SESSION['user_id'];
@@ -61,7 +63,7 @@ $consumed_count = $conn->query("SELECT COUNT(*) c FROM bookings WHERE user_id=$u
 <div class="d-flex">
     <?php include '../includes/student_sidebar.php'; ?>
     <div class="main-content flex-grow-1">
-        <div class="topbar"><h1><i class="bi bi-person-circle me-2"></i>My Profile</h1></div>
+        <?php $page_title = '<i class="bi bi-person-circle me-2"></i>My Profile'; include '../includes/topbar.php'; ?>
         <div class="p-4 fade-in-up">
             <?php if ($msg):  ?><div class="alert alert-success alert-dismissible fade show"><i class="bi bi-check-circle me-1"></i><?= htmlspecialchars($msg) ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div><?php endif; ?>
             <?php if ($error): ?><div class="alert alert-danger alert-dismissible fade show"><i class="bi bi-x-circle me-1"></i><?= htmlspecialchars($error) ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div><?php endif; ?>
@@ -152,6 +154,6 @@ $consumed_count = $conn->query("SELECT COUNT(*) c FROM bookings WHERE user_id=$u
         </div>
     </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<?php include '../includes/scripts.php'; ?>
 </body>
 </html>

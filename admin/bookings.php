@@ -1,6 +1,7 @@
 <?php
 require_once '../includes/db.php';
 require_once '../includes/auth.php';
+require_once '../includes/notifications.php';
 require_once '../includes/services/NotificationService.php';
 
 // Load PHPMailer if available
@@ -27,9 +28,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($stmt->affected_rows > 0) {
                     logAction($conn, 'Booking Approved', "Booking #{$id} approved.");
                     $conn->commit();
-                    // Send email AFTER transaction commit — failure won't roll back data
+                    // In-app notification
+                    notifyBookingStatus($conn, $id);
+                    // Email notification (fails gracefully)
                     (new NotificationService($conn))->sendBookingAlert($id, 'approved');
-                    $flash = "Booking #{$id} approved and student notified.";
+                    $flash = "Booking #{$id} approved — student notified.";
                 } else {
                     $conn->rollback();
                     $flash = "Booking #{$id} could not be approved (already processed?).";
@@ -42,8 +45,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($stmt->affected_rows > 0) {
                     logAction($conn, 'Booking Rejected', "Booking #{$id} rejected.");
                     $conn->commit();
+                    notifyBookingStatus($conn, $id);
                     (new NotificationService($conn))->sendBookingAlert($id, 'rejected');
-                    $flash = "Booking #{$id} rejected and student notified.";
+                    $flash = "Booking #{$id} rejected — student notified.";
                 } else {
                     $conn->rollback();
                     $flash = "Booking #{$id} could not be rejected (already processed?).";
@@ -179,15 +183,8 @@ function session_start_if_needed(): void { if (session_status() !== PHP_SESSION_
 <div class="d-flex">
 <?php include '../includes/sidebar.php'; ?>
 <div class="main-content flex-grow-1">
-
-<div class="topbar d-flex justify-content-between align-items-center flex-wrap gap-2">
-    <h1><i class="bi bi-calendar-check me-2"></i>Booking Management</h1>
-    <?php if ($notif_enabled): ?>
-    <span class="badge bg-success fs-6 px-3">
-        <i class="bi bi-bell-fill me-1"></i>Email Alerts Active
-    </span>
-    <?php endif; ?>
-</div>
+<?php $page_title = '<i class="bi bi-calendar-check me-2"></i>Booking Management';
+include '../includes/topbar.php'; ?>
 
 <div class="p-4 fade-in-up">
 
@@ -356,6 +353,6 @@ function session_start_if_needed(): void { if (session_status() !== PHP_SESSION_
 </div><!-- /main-content -->
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<?php include '../includes/scripts.php'; ?>
 </body>
 </html>
