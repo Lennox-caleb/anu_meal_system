@@ -30,10 +30,11 @@ $hash_student = password_hash('student123', PASSWORD_BCRYPT);
 $conn->query("DELETE FROM users WHERE username IN ('superadmin','admin','student')");
 
 // Use direct SQL with proper escaping (more reliable on TiDB than prepared statements)
+// Include explicit ID values since TiDB doesn't auto-increment without being set initially
 $inserts = [
-    "INSERT INTO users (username, password, fullname, email, role, student_id) VALUES ('superadmin', '$hash_admin', 'Super Administrator', 'superadmin@anu.ac.ke', 'super_admin', 'SA001')",
-    "INSERT INTO users (username, password, fullname, email, role, student_id) VALUES ('admin', '$hash_admin', 'Cafeteria Manager', 'manager@anu.ac.ke', 'admin', 'AD001')",
-    "INSERT INTO users (username, password, fullname, email, role, student_id) VALUES ('student', '$hash_student', 'John Doe', 'john.doe@anu.ac.ke', 'student', 'ANU/2024/001')",
+    "INSERT INTO users (id, username, password, fullname, email, role, student_id) VALUES (1, 'superadmin', '$hash_admin', 'Super Administrator', 'superadmin@anu.ac.ke', 'super_admin', 'SA001')",
+    "INSERT INTO users (id, username, password, fullname, email, role, student_id) VALUES (2, 'admin', '$hash_admin', 'Cafeteria Manager', 'manager@anu.ac.ke', 'admin', 'AD001')",
+    "INSERT INTO users (id, username, password, fullname, email, role, student_id) VALUES (4, 'student', '$hash_student', 'John Doe', 'john.doe@anu.ac.ke', 'student', 'ANU/2024/001')",
 ];
 
 $errors = [];
