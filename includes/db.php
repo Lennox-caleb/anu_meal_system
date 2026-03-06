@@ -1,16 +1,26 @@
 <?php
 // =====================================================
 // DATABASE CONFIGURATION
-// =====================================================
-//define('DB_HOST', 'localhost');
-//define('DB_USER', 'root');
-//define('DB_PASS', '');
-//define('DB_NAME', 'anu_meal_booking');
+// Railway env vars: MYSQLHOST, MYSQLPORT, MYSQLUSER, MYSQLPASSWORD, MYSQLDATABASE
+// Local fallbacks for XAMPP/WAMP development
 // =====================================================
 
 mysqli_report(MYSQLI_REPORT_OFF);
 
-$conn = new mysqli('localhost', 'root','', 'anu_meal_booking', 3307);
+$db_host = getenv('MYSQLHOST')     ?: 'localhost';
+$db_port = (int)(getenv('MYSQLPORT') ?: 3307);
+$db_user = getenv('MYSQLUSER')     ?: 'root';
+$db_pass = getenv('MYSQLPASSWORD') ?: '';
+$db_name = getenv('MYSQLDATABASE') ?: 'anu_meal_booking';
+
+// Remote hosts (Aiven, etc.) require SSL — local dev connects normally
+if (getenv('MYSQLHOST')) {
+    $conn = mysqli_init();
+    mysqli_ssl_set($conn, null, null, null, null, null);
+    $conn->real_connect($db_host, $db_user, $db_pass, $db_name, $db_port, null, MYSQLI_CLIENT_SSL | MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT); //
+} else {
+    $conn = new mysqli($db_host, $db_user, $db_pass, $db_name, $db_port);
+}
 
 if ($conn->connect_errno) {
     $err = $conn->connect_error;
@@ -43,3 +53,9 @@ if ($conn->connect_errno) {
 }
 
 $conn->set_charset('utf8mb4');
+
+// Tell MySQL to return TIMESTAMP columns in EAT (UTC+3)
+$conn->query("SET time_zone = '+03:00'");
+
+// Keep PHP's clock in sync with the DB timezone.
+date_default_timezone_set('Africa/Nairobi');
