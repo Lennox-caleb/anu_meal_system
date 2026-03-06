@@ -26,20 +26,21 @@ $conn->set_charset('utf8mb4');
 $hash_admin   = password_hash('admin123',   PASSWORD_BCRYPT);
 $hash_student = password_hash('student123', PASSWORD_BCRYPT);
 
-// Wipe old broken users and re-insert
+// Delete old broken users first
 $conn->query("DELETE FROM users WHERE username IN ('superadmin','admin','student')");
 
-$stmt = $conn->prepare("INSERT INTO users (username,password,fullname,email,role,student_id) VALUES (?,?,?,?,?,?)");
-
-$users = [
-    ['superadmin', $hash_admin,   'Super Administrator', 'superadmin@anu.ac.ke', 'super_admin', 'SA001'],
-    ['admin',      $hash_admin,   'Cafeteria Manager',   'manager@anu.ac.ke',    'admin',       'AD001'],
-    ['student',    $hash_student, 'John Doe',            'john.doe@anu.ac.ke',   'student',     'ANU/2024/001'],
+// Use direct SQL with proper escaping (more reliable on TiDB than prepared statements)
+$inserts = [
+    "INSERT INTO users (username, password, fullname, email, role, student_id) VALUES ('superadmin', '$hash_admin', 'Super Administrator', 'superadmin@anu.ac.ke', 'super_admin', 'SA001')",
+    "INSERT INTO users (username, password, fullname, email, role, student_id) VALUES ('admin', '$hash_admin', 'Cafeteria Manager', 'manager@anu.ac.ke', 'admin', 'AD001')",
+    "INSERT INTO users (username, password, fullname, email, role, student_id) VALUES ('student', '$hash_student', 'John Doe', 'john.doe@anu.ac.ke', 'student', 'ANU/2024/001')",
 ];
 
-foreach ($users as $u) {
-    $stmt->bind_param("ssssss", $u[0], $u[1], $u[2], $u[3], $u[4], $u[5]);
-    $stmt->execute();
+$errors = [];
+foreach ($inserts as $sql) {
+    if (!$conn->query($sql)) {
+        $errors[] = "Query error: " . $conn->error;
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -57,22 +58,33 @@ foreach ($users as $u) {
             ✅ Login Passwords Fixed!
         </div>
         <div class="card-body p-4">
-            <p class="text-success fw-semibold">All default users have been reset successfully.</p>
+            <?php if (!empty($errors)): ?>
+                <div class="alert alert-danger">
+                    <strong>❌ Errors occurred:</strong>
+                    <ul class="mb-0 mt-2">
+                        <?php foreach ($errors as $e): ?>
+                            <li><?= htmlspecialchars($e) ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            <?php else: ?>
+                <p class="text-success fw-semibold">✅ All default users have been reset successfully.</p>
 
-            <table class="table table-bordered small">
-                <thead class="table-danger">
-                    <tr><th>Role</th><th>Username</th><th>Password</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>Super Admin</td><td><code>superadmin</code></td><td><code>admin123</code></td></tr>
-                    <tr><td>Admin</td>      <td><code>admin</code></td>      <td><code>admin123</code></td></tr>
-                    <tr><td>Student</td>    <td><code>student</code></td>    <td><code>student123</code></td></tr>
-                </tbody>
-            </table>
+                <table class="table table-bordered small">
+                    <thead class="table-danger">
+                        <tr><th>Role</th><th>Username</th><th>Password</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Super Admin</td><td><code>superadmin</code></td><td><code>admin123</code></td></tr>
+                        <tr><td>Admin</td>      <td><code>admin</code></td>      <td><code>admin123</code></td></tr>
+                        <tr><td>Student</td>    <td><code>student</code></td>    <td><code>student123</code></td></tr>
+                    </tbody>
+                </table>
 
-            <div class="alert alert-warning small py-2">
-                ⚠️ Delete <code>fix_login.php</code> after logging in successfully!
-            </div>
+                <div class="alert alert-warning small py-2">
+                    ⚠️ Delete <code>fix_login.php</code> after logging in successfully!
+                </div>
+            <?php endif; ?>
 
             <a href="login.php"
                class="btn w-100 fw-bold text-white"
